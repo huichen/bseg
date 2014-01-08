@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"sort"
 )
 
 const (
@@ -24,6 +25,7 @@ var (
 	ann_iters = flag.Int("ann_iters", 100, "")
 	iters     = flag.Int("iters", 100, "")
 	alpha     = flag.Float64("alpha", 20000, "")
+	min_count = flag.Int("min_count", 2, "")
 )
 
 type BSeg struct {
@@ -49,11 +51,20 @@ func (s *BSeg) DumpDict(path string) {
 	}
 	defer oFile.Close()
 
-	w := bufio.NewWriter(oFile)
+	ts := make(Tokens, 0)
 	for k, v := range s.dict {
-		if v > 0 {
-			fmt.Fprintf(w, "%s %d\n", strings.Replace(k, " ", "", -1), v)
+		if v >= *min_count {
+			ws := strings.Split(k, " ")
+			if len(ws) > 1 {
+				ts = append(ts, Token{name:strings.Join(ws, ""), count:v})
+			}
 		}
+	}
+	sort.Sort(ts)
+
+	w := bufio.NewWriter(oFile)
+	for i := len(ts)-1; i >=0; i-- {
+		fmt.Fprintf(w, "%s %d\n", ts[i].name, ts[i].count)
 	}
 	w.Flush()
 }
