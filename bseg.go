@@ -1,5 +1,23 @@
 package bseg
 
+// Reference: http://aclweb.org/anthology//C/C12/C12-1127.pdf
+// Reference: http://homepages.inf.ed.ac.uk/sgwater/papers/cognition-hdp.pdf [1]
+
+// There are two parameters for DP-Seg, alpha and prob_seg.
+// alpha is the Dirichlet base parameter:
+//   Setting alpha small (e.g. 1) will lead to a smaller, denser multi-word
+//   expression lexicon.
+//   Setting alpha large (e.g. 1e6) will lead to a larger, sparser multi-word
+//   expression lexicon.
+//   Default: alpha = 20000 (should be on order of expected size of multi-word
+//   expression lexicon).
+// prob_seg is the probability of a SEG between any two tokens:
+//   Setting prob_seg high will tend to produce shorter multi-word expressions.
+//   Setting prob_seg low will tend to produce longer shorter multi-word
+//   expressions.
+//   Default prob_seg = 0.67.
+//   This parameter is hard-coded in LogprobMWE.
+
 import (
 	"bufio"
 	"flag"
