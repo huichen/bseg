@@ -60,7 +60,15 @@ func NewBSeg() *BSeg {
 }
 
 func (s *BSeg) DecrDict(word string) {
-	s.dict[word]--
+	v, found := s.dict[word]
+	v--
+	if found {
+		if v > 0 {
+			s.dict[word] = v
+		} else {
+			delete(s.dict, word)
+		}
+	}
 }
 
 func (s *BSeg) DumpDict(path string) {
@@ -208,7 +216,6 @@ func (s *BSeg) Sample(alpha, temperature float64,
 		} else {
 			mweR = tokens[i1]
 		}
-		//mweLR = fmt.Sprintf("%s %s", mweL, mweR)
 		mweLR = mweL + " " + mweR
 
 		if segments[i] == SEG {

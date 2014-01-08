@@ -82,6 +82,7 @@ func main() {
 		"）":  ".",
 		"(":  ".",
 		")":  ".",
+		"．": ".",
 	}
 
 	w := bufio.NewWriter(oFile)
