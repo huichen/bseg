@@ -43,8 +43,8 @@ var (
 	seg_prob  = flag.Float64("seg_prob", 0.5, "")
 	ann_iters = flag.Int("ann_iters", 100, "")
 	iters     = flag.Int("iters", 100, "")
-	alpha     = flag.Float64("alpha", 20, "")
-	min_count = flag.Int("min_count", 2, "")
+	alpha     = flag.Float64("alpha", 1, "")
+	min_count = flag.Int("min_count", 5, "")
 )
 
 type BSeg struct {
