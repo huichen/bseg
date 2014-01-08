@@ -3,6 +3,7 @@ package bseg
 import (
 	"flag"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"strings"
@@ -35,10 +36,6 @@ func NewBSeg() *BSeg {
 	return s
 }
 
-func (s *BSeg) IncrDict(word string) {
-	s.dict[word]++
-}
-
 func (s *BSeg) DecrDict(word string) {
 	s.dict[word]--
 }
@@ -49,6 +46,53 @@ func (s *BSeg) FindInDict(word string) int {
 		return c
 	}
 	return 0
+}
+
+func (s *BSeg) IncrDict(word string) {
+	s.dict[word]++
+}
+
+func (s *BSeg) LogProbMWE(n int, tokens []string, i1, i2 int) float64 {
+	logProb := float64(0.0)
+	N := n + len(s.unigram)
+	for k := i1; k < i2; k++ {
+		logProb += math.Log(float64(s.unigram[tokens[k]]+1.0) / float64(N))
+	}
+	logProb += logProbSeg + float64(i2-i1-1)*logProbNoSeg
+	return logProb
+}
+
+func (s *BSeg) PrintDictStats() {
+	kBuckets := 16
+	numTypes := make([]int, kBuckets+1)
+	numTokens := make([]int, kBuckets+1)
+
+	for k, v := range s.dict {
+		mwe := strings.Split(k, " ")
+		l := len(mwe)
+		l--
+		if l > kBuckets {
+			l = kBuckets
+		}
+		numTypes[l]++
+		numTokens[l] += v
+	}
+
+	fmt.Printf("\tLength:\t")
+	for i := 1; i < kBuckets; i++ {
+		fmt.Printf("<%d>\t", i)
+	}
+
+	fmt.Printf("\n\tTypes:\t")
+	for i := 1; i < kBuckets; i++ {
+		fmt.Printf("%d\t", numTypes[i])
+	}
+
+	fmt.Printf("\n\tTokens:\t")
+	for i := 1; i < kBuckets; i++ {
+		fmt.Printf("%d\t", numTokens[i])
+	}
+	fmt.Printf("\n")
 }
 
 func (s *BSeg) ProcessText(tokens []string, segments []uint8) {
@@ -67,17 +111,16 @@ func (s *BSeg) ProcessText(tokens []string, segments []uint8) {
 	}
 
 	for i := 0; i < (*ann_iters + *iters); i++ {
-		temp := float64(*iters+1) / float64(*ann_iters)
+		temp := float64(i+1) / float64(*ann_iters)
+		if temp > 1 {
+			temp = 1
+		}
+		log.Printf("iter %d  Temp=%.2f", i, temp)
 		s.Sample(*alpha, temp, tokens, segments)
+		if i/10*10 == i {
+			s.PrintDictStats()
+		}
 	}
-}
-
-func (s *BSeg) TotalCount() int {
-	count := 0
-	for _, v := range s.dict {
-		count += v
-	}
-	return count
 }
 
 func (s *BSeg) Sample(alpha, temperature float64,
@@ -117,7 +160,8 @@ func (s *BSeg) Sample(alpha, temperature float64,
 		} else {
 			mweR = tokens[i1]
 		}
-		mweLR = fmt.Sprintf("%s %s", mweL, mweR)
+		//mweLR = fmt.Sprintf("%s %s", mweL, mweR)
+		mweLR = mweL + " " + mweR
 
 		if segments[i] == SEG {
 			numL = s.FindInDict(mweL)
@@ -168,12 +212,10 @@ func (s *BSeg) Sample(alpha, temperature float64,
 	}
 }
 
-func (s *BSeg) LogProbMWE(n int, tokens []string, i1, i2 int) float64 {
-	logProb := float64(0.0)
-	N := n + len(s.unigram)
-	for k := i1; k < i2; k++ {
-		logProb += math.Log(float64(s.unigram[tokens[k]]+1.0) / float64(N))
+func (s *BSeg) TotalCount() int {
+	count := 0
+	for _, v := range s.dict {
+		count += v
 	}
-	logProb += logProbSeg + float64(i2-i1-1)*logProbNoSeg
-	return logProb
+	return count
 }

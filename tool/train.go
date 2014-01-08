@@ -6,18 +6,14 @@ import (
 	"github.com/huichen/bseg"
 	"log"
 	"os"
+        "runtime/pprof"
 	"strings"
 )
 
 var (
-	input = flag.String(
-		"input",
-		"",
-		"")
-	output_dict = flag.String(
-		"output_dict",
-		"dict.txt",
-		"")
+	input = flag.String( "input", "", "")
+	output_dict = flag.String( "output_dict", "dict.txt", "")
+        cpuprofile      = flag.String("cpuprofile", "", "处理器profile文件")
 )
 
 func main() {
@@ -71,5 +67,16 @@ func main() {
 	}
 
 	seg := bseg.NewBSeg()
+
+        // 打开处理器profile文件
+        if *cpuprofile != "" {
+                f, err := os.Create(*cpuprofile)
+                if err != nil {
+                        log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+	        defer pprof.StopCPUProfile()
+        }
+
 	seg.ProcessText(tokens, segments)
 }
