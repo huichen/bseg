@@ -19,9 +19,10 @@ const (
 )
 
 var (
-	logProbSeg   = math.Log(0.67)
-	logProbNoSeg = math.Log(0.33)
+	logProbSeg   float64
+	logProbNoSeg float64
 
+	seg_prob  = flag.Float64("seg_prob", 0.67, "")
 	ann_iters = flag.Int("ann_iters", 100, "")
 	iters     = flag.Int("iters", 100, "")
 	alpha     = flag.Float64("alpha", 20000, "")
@@ -87,7 +88,7 @@ func (s *BSeg) LogProbMWE(tokens []string, i1, i2 int) float64 {
 	for k := i1; k < i2; k++ {
 		logProb += math.Log(float64(s.unigram[tokens[k]]+1.0) / float64(N))
 	}
-	logProb += logProbSeg + float64(i2-i1-1)*logProbNoSeg
+	logProb += math.Log(*seg_prob) + float64(i2-i1-1)*math.Log(1-*seg_prob)
 	return logProb
 }
 
