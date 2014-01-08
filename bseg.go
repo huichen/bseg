@@ -1,11 +1,13 @@
 package bseg
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
 	"math"
 	"math/rand"
+	"os"
 	"strings"
 )
 
@@ -16,8 +18,8 @@ const (
 )
 
 var (
-	logProbSeg   = math.Log(0.9)
-	logProbNoSeg = math.Log(0.1)
+	logProbSeg   = math.Log(0.67)
+	logProbNoSeg = math.Log(0.33)
 
 	ann_iters = flag.Int("ann_iters", 100, "")
 	iters     = flag.Int("iters", 100, "")
@@ -40,6 +42,20 @@ func (s *BSeg) DecrDict(word string) {
 	s.dict[word]--
 }
 
+func (s *BSeg) DumpDict(path string) {
+	oFile, oErr := os.Create(path)
+	if oErr != nil {
+		log.Fatal(oErr)
+	}
+	defer oFile.Close()
+
+	w := bufio.NewWriter(oFile)
+	for k, v := range s.dict {
+		fmt.Fprintf(w, "%s\t%d\n", k, v)
+	}
+	w.Flush()
+}
+
 func (s *BSeg) FindInDict(word string) int {
 	c, f := s.dict[word]
 	if f {
@@ -52,9 +68,9 @@ func (s *BSeg) IncrDict(word string) {
 	s.dict[word]++
 }
 
-func (s *BSeg) LogProbMWE(n int, tokens []string, i1, i2 int) float64 {
+func (s *BSeg) LogProbMWE(tokens []string, i1, i2 int) float64 {
 	logProb := float64(0.0)
-	N := n + len(s.unigram)
+	N := len(s.dict) + len(s.unigram)
 	for k := i1; k < i2; k++ {
 		logProb += math.Log(float64(s.unigram[tokens[k]]+1.0) / float64(N))
 	}
@@ -125,7 +141,7 @@ func (s *BSeg) ProcessText(tokens []string, segments []uint8) {
 
 func (s *BSeg) Sample(alpha, temperature float64,
 	tokens []string, segments []uint8) {
-	N := s.TotalCount()
+	N := len(s.dict)
 	invNPlusAlpha := 1.0 / (float64(N) + alpha)
 
 	var mweL, mweR, mweLR string
@@ -177,8 +193,8 @@ func (s *BSeg) Sample(alpha, temperature float64,
 		}
 
 		var sumProb float64
-		logProbL := s.LogProbMWE(N, tokens, iL, i1)
-		logProbR := s.LogProbMWE(N, tokens, i1, iR)
+		logProbL := s.LogProbMWE(tokens, iL, i1)
+		logProbR := s.LogProbMWE(tokens, i1, iR)
 		logProbLR := logProbL + logProbR
 
 		prob0 := (float64(numLR) + alpha*math.Exp(logProbLR)) * invNPlusAlpha
@@ -210,12 +226,4 @@ func (s *BSeg) Sample(alpha, temperature float64,
 			s.IncrDict(mweLR)
 		}
 	}
-}
-
-func (s *BSeg) TotalCount() int {
-	count := 0
-	for _, v := range s.dict {
-		count += v
-	}
-	return count
 }
