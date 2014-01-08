@@ -40,10 +40,10 @@ var (
 	logProbSeg   float64
 	logProbNoSeg float64
 
-	seg_prob  = flag.Float64("seg_prob", 0.67, "")
+	seg_prob  = flag.Float64("seg_prob", 0.5, "")
 	ann_iters = flag.Int("ann_iters", 100, "")
 	iters     = flag.Int("iters", 100, "")
-	alpha     = flag.Float64("alpha", 20000, "")
+	alpha     = flag.Float64("alpha", 20, "")
 	min_count = flag.Int("min_count", 2, "")
 )
 
@@ -179,8 +179,7 @@ func (s *BSeg) ProcessText(tokens []string, segments []uint8) {
 	}
 }
 
-func (s *BSeg) Sample(alpha, temperature float64,
-	tokens []string, segments []uint8) {
+func (s *BSeg) Sample(alpha, temperature float64, tokens []string, segments []uint8) {
 	N := len(s.dict)
 	invNPlusAlpha := 1.0 / (float64(N) + alpha)
 
