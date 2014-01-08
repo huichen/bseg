@@ -8,8 +8,8 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"strings"
 	"sort"
+	"strings"
 )
 
 const (
@@ -56,14 +56,14 @@ func (s *BSeg) DumpDict(path string) {
 		if v >= *min_count {
 			ws := strings.Split(k, " ")
 			if len(ws) > 1 {
-				ts = append(ts, Token{name:strings.Join(ws, ""), count:v})
+				ts = append(ts, Token{name: strings.Join(ws, ""), count: v})
 			}
 		}
 	}
 	sort.Sort(ts)
 
 	w := bufio.NewWriter(oFile)
-	for i := len(ts)-1; i >=0; i-- {
+	for i := len(ts) - 1; i >= 0; i-- {
 		fmt.Fprintf(w, "%s %d\n", ts[i].name, ts[i].count)
 	}
 	w.Flush()
