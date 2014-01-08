@@ -1,11 +1,11 @@
 package main
 
 import (
-	"flag"
-	"os"
-	"log"
 	"bufio"
+	"flag"
 	"github.com/huichen/bseg"
+	"log"
+	"os"
 	"strings"
 )
 
@@ -23,22 +23,22 @@ var (
 func main() {
 	flag.Parse()
 
-        file, err := os.Open(*input)
-        if err != nil {
+	file, err := os.Open(*input)
+	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 
-        log.Printf("读入文本 %s", *input)
-        scanner := bufio.NewScanner(file)
-        lines := []string{}
-        for scanner.Scan() {
+	log.Printf("读入文本 %s", *input)
+	scanner := bufio.NewScanner(file)
+	lines := []string{}
+	for scanner.Scan() {
 		text := scanner.Text()
-                if text != "" {
-                        lines = append(lines, text)
-                }
-        }
-        log.Print("文件行数", len(lines))
+		if text != "" {
+			lines = append(lines, text)
+		}
+	}
+	log.Print("文件行数", len(lines))
 
 	tokens := []string{}
 	segments := []uint8{}
@@ -53,7 +53,7 @@ func main() {
 		}
 
 		words := strings.Split(t, " ")
-		for i := 0; i < len(words) - 1; i++ {
+		for i := 0; i < len(words)-1; i++ {
 			tokens = append(tokens, words[i])
 			segments = append(segments, bseg.NOSEG)
 		}
@@ -63,7 +63,7 @@ func main() {
 	}
 
 	if segments[len(segments)-1] != bseg.NOSEG {
-		segments = segments[0:len(segments)-1]
+		segments = segments[0 : len(segments)-1]
 	}
 
 	if len(tokens) != len(segments)+1 {
