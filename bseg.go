@@ -51,7 +51,9 @@ func (s *BSeg) DumpDict(path string) {
 
 	w := bufio.NewWriter(oFile)
 	for k, v := range s.dict {
-		fmt.Fprintf(w, "%s\t%d\n", k, v)
+		if v > 0 {
+			fmt.Fprintf(w, "%s %d\n", strings.Replace(k, " ", "", -1), v)
+		}
 	}
 	w.Flush()
 }
