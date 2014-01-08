@@ -3,7 +3,6 @@ package bseg
 import (
 	"flag"
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"strings"
