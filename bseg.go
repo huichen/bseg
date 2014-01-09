@@ -44,7 +44,8 @@ var (
 	ann_iters = flag.Int("ann_iters", 100, "")
 	iters     = flag.Int("iters", 100, "")
 	alpha     = flag.Float64("alpha", 1, "")
-	min_count = flag.Int("min_count", 5, "")
+	min_token_count = flag.Int("min_token_count", 5, "")
+	min_token_length = flag.Int("min_token_length", 1, "")
 )
 
 type BSeg struct {
@@ -80,9 +81,9 @@ func (s *BSeg) DumpDict(path string) {
 
 	ts := make(Tokens, 0)
 	for k, v := range s.dict {
-		if v >= *min_count {
+		if v >= *min_token_count {
 			ws := strings.Split(k, " ")
-			if len(ws) > 1 {
+			if len(ws) >= *min_token_length {
 				ts = append(ts, Token{name: strings.Join(ws, ""), count: v})
 			}
 		}
