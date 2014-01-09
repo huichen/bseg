@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/huichen/sego"
 	"log"
 	"os"
 	"unicode"
@@ -11,18 +12,19 @@ import (
 )
 
 var (
-	input = flag.String(
-		"input",
-		"",
-		"")
-	output = flag.String(
-		"output",
-		"output.txt",
-		"")
+	input  = flag.String("input", "", "")
+	output = flag.String("output", "output.txt", "")
+
+	sego_dict = flag.String("sego_dict", "", "")
 )
 
 func main() {
 	flag.Parse()
+
+	segmenter := sego.Segmenter{}
+	if *sego_dict != "" {
+		segmenter.LoadDictionary(*sego_dict)
+	}
 
 	// 打开将要搜索的文件
 	file, err := os.Open(*input)
@@ -52,17 +54,43 @@ func main() {
 	w := bufio.NewWriter(oFile)
 	inStopToken := false
 	for _, t := range lines {
-		ws := splitTextToWords([]byte(t))
-		for _, word := range ws {
-			if !IsBoundary(string(word)) {
-				fmt.Fprintln(w, string(word))
-				inStopToken = false
-			} else {
-				if !inStopToken {
-					inStopToken = true
-					fmt.Fprintln(w, ".")
+		if *sego_dict == "" {
+			ws := splitTextToWords([]byte(t))
+			for _, word := range ws {
+				if !IsBoundary(string(word)) {
+					fmt.Fprintln(w, string(word))
+					inStopToken = false
+				} else {
+					if !inStopToken {
+						inStopToken = true
+						fmt.Fprintln(w, ".")
+					}
 				}
 			}
+		} else {
+			segs := segmenter.Segment([]byte(t))
+			for _, s := range segs {
+				word := s.Token().Text()
+				if !IsBoundary(word) {
+					ws := splitTextToWords([]byte(word))
+					line := ""
+					for i, ww := range ws {
+						if i != 0 {
+							line += " " + string(ww)
+						} else {
+							line += string(ww)
+						}
+					}
+					fmt.Fprintln(w, line)
+					inStopToken = false
+				} else {
+					if !inStopToken {
+						inStopToken = true
+						fmt.Fprintln(w, ".")
+					}
+				}
+			}
+
 		}
 	}
 	w.Flush()
@@ -102,7 +130,9 @@ func IsBoundary(word string) bool {
 		"）":  ".",
 		"(":  ".",
 		")":  ".",
-		"．": ".",
+		"．":  ".",
+		"‘":  ".",
+		"’":  ".",
 	}
 	_, found := stopTokens[word]
 	return found
