@@ -49,6 +49,26 @@ func main() {
 	}
 	defer oFile.Close()
 
+	w := bufio.NewWriter(oFile)
+	inStopToken := false
+	for _, t := range lines {
+		ws := splitTextToWords([]byte(t))
+		for _, word := range ws {
+			if !IsBoundary(string(word)) {
+				fmt.Fprintln(w, string(word))
+				inStopToken = false
+			} else {
+				if !inStopToken {
+					inStopToken = true
+					fmt.Fprintln(w, ".")
+				}
+			}
+		}
+	}
+	w.Flush()
+}
+
+func IsBoundary(word string) bool {
 	stopTokens := map[string]string{
 		"。":  ".",
 		"，":  ".",
@@ -84,25 +104,8 @@ func main() {
 		")":  ".",
 		"．": ".",
 	}
-
-	w := bufio.NewWriter(oFile)
-	inStopToken := false
-	for _, t := range lines {
-		ws := splitTextToWords([]byte(t))
-		for _, word := range ws {
-			_, has := stopTokens[string(word)]
-			if !has {
-				fmt.Fprintln(w, string(word))
-				inStopToken = false
-			} else {
-				if !inStopToken {
-					inStopToken = true
-					fmt.Fprintln(w, ".")
-				}
-			}
-		}
-	}
-	w.Flush()
+	_, found := stopTokens[word]
+	return found
 }
 
 // 将文本划分成字元
