@@ -57,6 +57,7 @@ func NewBSeg() *BSeg {
 	s := new(BSeg)
 	s.dict = make(map[string]int)
 	s.unigram = make(map[string]int)
+	rand.Seed(1234)
 	return s
 }
 
@@ -84,17 +85,31 @@ func (s *BSeg) DumpDict(path string) {
 		if v >= *min_token_count {
 			ws := strings.Split(k, " ")
 			if len(ws) >= *min_token_length {
-				ts = append(ts, Token{name: strings.Join(ws, ""), count: v})
+				ts = append(ts, Token{Name: strings.Join(ws, ""), Count: v})
 			}
 		}
 	}
 	sort.Sort(ts)
 
 	w := bufio.NewWriter(oFile)
-	for i := len(ts) - 1; i >= 0; i-- {
-		fmt.Fprintf(w, "%s %d\n", ts[i].name, ts[i].count)
+	for i := 0; i < len(ts); i++ {
+		fmt.Fprintf(w, "%s %d\n", ts[i].Name, ts[i].Count)
 	}
 	w.Flush()
+}
+
+func (s *BSeg) GetDict() Tokens {
+	ts := make(Tokens, 0)
+	for k, v := range s.dict {
+		if v >= *min_token_count {
+			ws := strings.Split(k, " ")
+			if len(ws) >= *min_token_length {
+				ts = append(ts, Token{Name: strings.Join(ws, ""), Count: v})
+			}
+		}
+	}
+	sort.Sort(ts)
+	return ts
 }
 
 func (s *BSeg) FindInDict(word string) int {
@@ -172,10 +187,10 @@ func (s *BSeg) ProcessText(tokens []string, segments []uint8) {
 		if temp > 1 {
 			temp = 1
 		}
-		log.Printf("iter %d  Temp=%.2f", i, temp)
+		//log.Printf("iter %d  Temp=%.2f", i, temp)
 		s.Sample(*alpha, temp, tokens, segments)
 		if i/10*10 == i {
-			s.PrintDictStats()
+			//s.PrintDictStats()
 		}
 	}
 }

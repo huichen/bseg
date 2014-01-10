@@ -1,8 +1,8 @@
 package bseg
 
 type Token struct {
-	name  string
-	count int
+	Name  string
+	Count int
 }
 
 type Tokens []Token
@@ -16,5 +16,8 @@ func (ts Tokens) Swap(i, j int) {
 }
 
 func (ts Tokens) Less(i, j int) bool {
-	return ts[i].count < ts[j].count
+	if ts[i].Count != ts[j].Count {
+		return ts[i].Count > ts[j].Count
+	}
+	return ts[i].Name < ts[j].Name
 }
