@@ -46,7 +46,7 @@ var (
 	alpha            = flag.Float64("alpha", 1, "")
 	min_token_count  = flag.Int("min_token_count", 5, "")
 	min_token_length = flag.Int("min_token_length", 1, "")
-	print_log	 = flag.Bool("print_log", true, "")
+	print_log        = flag.Bool("print_log", true, "")
 )
 
 type BSeg struct {
