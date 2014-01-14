@@ -15,6 +15,7 @@ Extract = function() {
 	    $('textarea#output').html("输入不能大于50K");
 	    return
     }
+    $('textarea#output').html("正在分析，请稍等 ...");
     $.ajax({
         url: "/json",
         type: "POST",

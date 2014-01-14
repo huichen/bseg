@@ -40,12 +40,13 @@ var (
 	logProbSeg   float64
 	logProbNoSeg float64
 
-	seg_prob  = flag.Float64("seg_prob", 0.5, "")
-	ann_iters = flag.Int("ann_iters", 100, "")
-	iters     = flag.Int("iters", 100, "")
-	alpha     = flag.Float64("alpha", 1, "")
-	min_token_count = flag.Int("min_token_count", 5, "")
+	seg_prob         = flag.Float64("seg_prob", 0.5, "")
+	ann_iters        = flag.Int("ann_iters", 100, "")
+	iters            = flag.Int("iters", 100, "")
+	alpha            = flag.Float64("alpha", 1, "")
+	min_token_count  = flag.Int("min_token_count", 5, "")
 	min_token_length = flag.Int("min_token_length", 1, "")
+	print_log	 = flag.Bool("print_log", true, "")
 )
 
 type BSeg struct {
@@ -187,9 +188,11 @@ func (s *BSeg) ProcessText(tokens []string, segments []uint8) {
 		if temp > 1 {
 			temp = 1
 		}
-		log.Printf("iter %d  Temp=%.2f", i, temp)
+		if *print_log {
+			log.Printf("iter %d  Temp=%.2f", i, temp)
+		}
 		s.Sample(*alpha, temp, tokens, segments)
-		if i/10*10 == i {
+		if *print_log && i/10*10 == i {
 			s.PrintDictStats()
 		}
 	}
