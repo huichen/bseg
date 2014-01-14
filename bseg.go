@@ -187,10 +187,10 @@ func (s *BSeg) ProcessText(tokens []string, segments []uint8) {
 		if temp > 1 {
 			temp = 1
 		}
-		//log.Printf("iter %d  Temp=%.2f", i, temp)
+		log.Printf("iter %d  Temp=%.2f", i, temp)
 		s.Sample(*alpha, temp, tokens, segments)
 		if i/10*10 == i {
-			//s.PrintDictStats()
+			s.PrintDictStats()
 		}
 	}
 }

@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
-	"strings"
 )
 
 var (
@@ -36,36 +35,7 @@ func main() {
 	}
 	log.Print("文件行数", len(lines))
 
-	tokens := []string{}
-	segments := []uint8{}
-	prevSeg := bseg.FIXSEG
-	for _, t := range lines {
-		if t == "." {
-			if prevSeg == bseg.SEG {
-				segments[len(segments)-1] = bseg.FIXSEG
-			}
-			prevSeg = bseg.FIXSEG
-			continue
-		}
-
-		words := strings.Split(t, " ")
-		for i := 0; i < len(words)-1; i++ {
-			tokens = append(tokens, words[i])
-			segments = append(segments, bseg.NOSEG)
-		}
-		tokens = append(tokens, words[len(words)-1])
-		segments = append(segments, bseg.SEG)
-		prevSeg = bseg.SEG
-	}
-
-	if segments[len(segments)-1] != bseg.NOSEG {
-		segments = segments[0 : len(segments)-1]
-	}
-
-	if len(tokens) != len(segments)+1 {
-		log.Fatal("not same")
-	}
-
+	tokens, segments := bseg.GetSegmentsFromText(lines)
 	seg := bseg.NewBSeg()
 
 	// 打开处理器profile文件
